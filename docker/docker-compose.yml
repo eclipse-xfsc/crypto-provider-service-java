@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  vault:
+    image: hashicorp/vault
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "root-token"  # Predefined root token
+      VAULT_ADDR: "http://127.0.0.1:8200"  # Vault address
+      VAULT_LICENSE: accept  # Accept the Vault Enterprise license if applicable
+      VAULT_API_ADDR: "http://127.0.0.1:8200"  # API address
+      VAULT_CLUSTER_ADDR: "http://127.0.0.1:8201"  # Cluster address
+      VAULT_AUTOUNSEAL_TRANSIT_PATH: "transit/autounseal"  # Transit auto-unseal path
+      VAULT_AUTOUNSEAL_TRANSIT_KEY_NAME: "autounseal-key"  # Transit auto-unseal key name
+    restart: unless-stopped
+  
+#  signer:
+#    image: code.europa.eu:4567/simpl/gaia-x-edc/poc-gaia-edc/signer:latest
+#    container_name: signer
+#    ports:
+#      - "8083:8080"
+#    environment:
+#      VAULT_ADRESS: "http://vault:8200"  # Replace with your desired root token
+#      VAULT_TOKEN: "root-token"
+#      ENGINE_PATH: /opt/plugins/hashicorp-vault-provider.so

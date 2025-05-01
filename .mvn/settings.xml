@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd"
+  xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <localRepository>.m2/repository</localRepository>
+  <pluginGroups />
+
+  <servers>
+    <server>
+      <id>anonymous</id>
+      <username>anonymous</username>
+      <password>anonymous</password>
+    </server>
+
+    <server>
+      <id>central</id>
+      <username>${ARTIFACTORY_USER_AC}</username>
+      <password>${ARTIFACTORY_PASSWORD_AC}</password>
+    </server>
+
+    <server>
+      <id>gitlab-packages-microservice-starter</id>
+      <configuration>
+        <httpHeaders>
+          <property>
+            <name>Private-Token</name>
+            <value>${ACCESS_TOKEN_MICROSERVICE_STARTER_READ_API}</value>
+          </property>
+        </httpHeaders>
+      </configuration>
+    </server>
+  </servers>
+
+  <mirrors>
+    <mirror>
+      <id>central</id>
+      <mirrorOf>central</mirrorOf>
+      <url>https://artifactory.devops.telekom.de/artifactory/maven-central/</url>
+    </mirror>
+  </mirrors>
+
+  <profiles>
+    <profile>
+      <id>gitlab-packages-microservice-starter</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>gitlab-packages-microservice-starter</id>
+          <url>${CI_API_V4_URL}/projects/189015/packages/maven</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+</settings>

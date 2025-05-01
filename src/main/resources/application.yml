@@ -1,0 +1,83 @@
+management:
+  endpoint:
+    configprops:
+      show-values: ALWAYS
+    env:
+      show-values: ALWAYS
+    health:
+      show-details: ALWAYS
+  endpoints:
+    web:
+      exposure:
+        include: "*" #health, info, metrics, prometheus
+  otlp:
+    collector:
+      url: #http://localhost:4318/v1
+    metrics:
+      export:
+        enabled: false
+        url: ${management.otlp.collector.url}/metrics
+        step: 10s
+    tracing:
+      endpoint: ${management.otlp.collector.url}/traces
+      export:
+        step: 10s # Export interval set to 10 seconds
+  tracing:
+    enabled: false
+    sampling:
+      probability: 1.0
+
+server:
+  port: '${SIGNER_PORT:8085}'
+  tomcat:
+    mbeanregistry:
+      enabled: true
+  shutdown: graceful
+
+spring:
+  application:
+    name: signer
+  mvc:
+    log-request-details: true
+  threads:
+    virtual:
+      enabled: true
+      
+springdoc:
+  api-docs:
+    path: /api/docs
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    eu.xfsc.tsa.sign: DEBUG
+    org.springframework.web: DEBUG
+    
+signer:
+  vault:
+    token: root-token
+    uri: http://localhost:8200
+  sign-with-vault: false  
+  verification:
+    trust-anchor-url: "https://registry.lab.gaia-x.eu/v1/api/trustAnchor/chain/file"
+    signature-verifier: uni-res #local
+    did:
+      base-url: "https://dev.uniresolver.io/1.0" #/identifiers/"
+      cache:
+        size: 100
+        timeout: 1H
+    doc-loader:
+      # when http enabled then contixt will be loaded on the fly..      
+      additional-context:
+    #    '[https://www.w3.org/2018/credentials/v1]': https://www.w3.org/2018/credentials/v1
+        '[https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#]': https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#
+        '[https://registry.lab.gaia-x.eu/v1/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#]': https://registry.lab.gaia-x.eu/v1/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#
+      # plain content and file scheme are supported too   
+      #  '[https://schema.org]': '{"@context": {}}'
+      #  '[https://sample.net]': file:///opt/context-sample.jsonld 
+      cache-size: 100
+      cache-timeout: 8H
+      enable-file: true
+      enable-http: true
+      enable-local-cache: false

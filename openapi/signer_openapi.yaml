@@ -1,0 +1,1331 @@
+# yaml-language-server: $schema='none'
+openapi: 3.0.3
+info:
+    contact:
+        name: Denis Sukhoroslov
+        email: denis.sukhoroslov@telekom.com
+    title: Signer Service
+    description: Signer service exposes HTTP API for making and verifying digital signatures and proofs for Verifiable Credentials.
+    version: 1.0.0
+servers:
+    - url: http://localhost:8085/v1
+      description: Signer Server
+#security:
+#  - oAuth2ClientCredentials: []
+
+tags:
+    - name: signer
+      description: Signer service makes digital signatures and proofs for verifiable credentials and presentations.
+paths:
+    /credential:
+        post:
+            tags:
+                - signer
+            summary: CreateCredential signer
+            description: CreateCredential creates VC with proof from raw JSON data.
+            operationId: createCredentials
+            parameters:
+                - name: x-origin
+                  in: header
+                  description: Origin of call
+                  allowEmptyValue: true
+                  required: true
+                  schema:
+                      type: string
+                      description: Origin of call
+                  example: https://test
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreateCredentialRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SignedCredentials"
+    /credential/proof:
+        post:
+            tags:
+                - signer
+            summary: CredentialProof signer
+            description: CredentialProof adds a proof to a given Verifiable Credential.
+            operationId: proofCredentials
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/ProofCredentialRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SignedCredentials"
+    /credential/sign:
+        post:
+            tags:
+                - signer
+            summary: VerifiableCredential signer
+            description: Also adds a proof to a given Verifiable Credential.
+            operationId: signCredentials
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/SignCredentialRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SignedCredentials"
+    /credential/verify:
+        post:
+            tags:
+                - signer
+            summary: VerifyCredential signer
+            description: VerifyCredential verifies the proof of a Verifiable Credential.
+            operationId: verifyCredentials
+            parameters:
+                - name: x-format
+                  in: header
+                  description: format
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: format
+                      default: ldp_vc
+                      example: ldp_vc
+                      enum:
+                          - ldp_vc
+                          - vc+sd-jwt
+                  example: vc+sd-jwt
+                - name: x-namespace
+                  in: header
+                  description: Namespace for status check
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: Namespace for status check
+                      example: Explicabo laborum temporibus rerum aut provident nihil.
+                  example: Minus sequi aperiam consequuntur tempora et.
+                - name: x-group
+                  in: header
+                  description: Group for status check
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: Group for status check
+                      example: Harum eligendi.
+                  example: Numquam rerum nobis repudiandae in.
+            requestBody:
+                description: Verifiable Credential in JSON format.
+                required: true
+                content:
+                    application/json:
+                        schema:
+#                            type: object
+#                            description: Verifiable Credential in JSON format.
+                            $ref: "#/components/schemas/SignedCredentials"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/VerifyResult"
+    /did/configuration:
+        get:
+            tags:
+                - signer
+            summary: DidConfiguration signer
+            description: Creates did configuration.
+            operationId: getDidConfiguration
+            parameters:
+                - name: x-namespace
+                  in: header
+                  description: Namespace.
+                  allowEmptyValue: true
+                  required: true
+                  schema:
+                      type: string
+                      description: Namespace.
+                      example: Omnis molestiae.
+                  example: Incidunt excepturi vel aliquid est esse.
+                - name: x-group
+                  in: header
+                  description: Group.
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: Group.
+                      default: ""
+                      example: Group
+                  example: Group
+                - name: x-origin
+                  in: header
+                  description: origin for the configuration.
+                  allowEmptyValue: true
+                  required: true
+                  schema:
+                      type: string
+                      description: origin for the configuration.
+                      example: Soluta enim vitae voluptatibus quos in nulla.
+                  example: Voluptas dolor aperiam unde non veritatis.
+                - name: x-did
+                  in: header
+                  description: did for the Configuration
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: did for the Configuration
+                      example: Dolorem eligendi.
+                  example: Impedit maiores earum.
+                - name: x-nonce
+                  in: header
+                  description: Proof challenge
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: Proof challenge
+                      example: 3483492392vvv-fff
+                  example: 3483492392vvv-fff
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/DidConfigurationRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+    /did/document:
+        get:
+            tags:
+                - signer
+            summary: didDoc signer
+            description: returns DID Document by did.
+            operationId: getDidDoc
+            parameters:
+                - name: x-namespace
+                  in: header
+                  description: Namespace.
+                  allowEmptyValue: true
+                  required: true
+                  schema:
+                      type: string
+                      description: Namespace.
+                      example: Reprehenderit animi quo rem magni ipsa laborum.
+                  example: Provident quo quo voluptates provident.
+                - name: x-group
+                  in: header
+                  description: Group.
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: Group.
+                      default: ""
+                      example: Group
+                  example: Group
+                - name: x-did
+                  in: header
+                  description: did which is used for controller and id
+                  allowEmptyValue: true
+                  required: true
+                  schema:
+                      type: string
+                      description: did which is used for controller and id
+                      example: exampl:com
+                  example: exampl:com
+                - name: x-engine
+                  in: header
+                  description: Engine which shall used.
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: Engine which shall used.
+                      default: transit
+                      example: transit
+                  example: transit
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/DidResponse"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+    /did/list:
+        get:
+            tags:
+                - signer
+            summary: didList signer
+            description: returns DIDs found by filter.
+            operationId: getDidList
+            parameters:
+                - name: x-namespace
+                  in: header
+                  description: Namespace.
+                  allowEmptyValue: true
+                  required: true
+                  schema:
+                      type: string
+                      description: Namespace.
+                      example: Voluptatem aut accusamus.
+                  example: Aperiam velit doloremque.
+                - name: x-group
+                  in: header
+                  description: Group.
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: Group.
+                      default: ""
+                      example: Group
+                  example: Group
+                - name: x-engine
+                  in: header
+                  description: Engine which shall used.
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: Engine which shall used.
+                      default: transit
+                      example: transit
+                  example: transit
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/DidListResponse"
+                            example:
+                                list:
+                                    - did: Sit voluptates nihil aspernatur.
+                                      name: Quos possimus.
+                                    - did: Sit voluptates nihil aspernatur.
+                                      name: Quos possimus.
+                                    - did: Sit voluptates nihil aspernatur.
+                                      name: Quos possimus.
+                                    - did: Sit voluptates nihil aspernatur.
+                                      name: Quos possimus.
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+    /jwk/{namespace}/{key}:
+        get:
+            tags:
+                - signer
+            summary: JwkPublicKey signer
+            description: JwkPublicKey returns public key by name and namespace.
+            operationId: getJwkPublicKey
+            parameters:
+                - name: namespace
+                  in: path
+                  description: Key namespace.
+                  required: true
+                  schema:
+                      type: string
+                      description: Key namespace.
+                      example: transit
+                  example: transit
+                - name: key
+                  in: path
+                  description: Key name.
+                  required: true
+                  schema:
+                      type: string
+                      description: Key name.
+                      example: my-ecdsa-key1
+                  example: my-ecdsa-key1
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/JwkPublicKeyRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                description: Public key encoded as JSON Web Key.
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+    /jwks:
+        get:
+            tags:
+                - signer
+            summary: Jwks signer
+            description: Jwks returns public keys in a given namespace.
+            operationId: getJwks
+            parameters:
+                - name: x-namespace
+                  in: header
+                  description: Namespace.
+                  allowEmptyValue: true
+                  required: true
+                  schema:
+                      type: string
+                      description: Namespace.
+                      example: Assumenda consequatur sapiente optio laudantium.
+                  example: Minima ut porro.
+                - name: x-group
+                  in: header
+                  description: Group.
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: Group.
+                      example: Voluptas expedita repellat iusto quis.
+                  example: Illum sit et libero labore culpa.
+                - name: x-engine
+                  in: header
+                  description: Engine which shall used.
+                  allowEmptyValue: true
+                  schema:
+                      type: string
+                      description: Engine which shall used.
+                      default: transit
+                      example: transit
+                  example: transit
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/JwksResponse"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+    /namespaces:
+        get:
+            tags:
+                - signer
+            summary: Namespaces signer
+            description: Namespaces returns all keys namespaces, which corresponds to enabled Vault transit engines.
+            operationId: getNamespaces
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                                    example: Sint est dolor culpa ut voluptatem explicabo.
+                                description: List of available keys namespaces.
+                                example:
+                                    - Sit veniam officia omnis est.
+                                    - Eum fuga nihil non sapiente.
+                                    - Nobis velit cumque voluptas et nobis.
+    /namespaces/{namespace}/keys:
+        get:
+            tags:
+                - signer
+            summary: NamespaceKeys signer
+            description: NamespaceKeys returns all keys in a given namespace.
+            operationId: getNamespaceKeys
+            parameters:
+                - name: namespace
+                  in: path
+                  description: Namespace for signing keys.
+                  required: true
+                  schema:
+                      type: string
+                      description: Namespace for signing keys.
+                      example: did:web:example.com
+                  example: did:web:example.com
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NamespaceKeysRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                                    example: Enim aperiam similique.
+                                description: Array of key names in a given namespace.
+                                example:
+                                    - Atque nulla voluptatem culpa.
+                                    - Molestias id nemo.
+                                    - Quia et qui voluptatem neque.
+    /presentation:
+        post:
+            tags:
+                - signer
+            summary: CreatePresentation signer
+            description: CreatePresentation creates VP with proof from raw JSON data.
+            operationId: createPresentation
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreatePresentationRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+    /presentation/proof:
+        post:
+            tags:
+                - signer
+            summary: PresentationProof signer
+            description: PresentationProof adds a proof to a given Verifiable Presentation.
+            operationId: proofPresentation
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/PresentationProofRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+    /presentation/verify:
+        post:
+            tags:
+                - signer
+            summary: VerifyPresentation signer
+            description: VerifyPresentation verifies the proof of a Verifiable Presentation.
+            operationId: verifyPresentation
+            requestBody:
+                description: Verifiable Presentation in JSON format.
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            description: Verifiable Presentation in JSON format.
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/VerifyResult"
+    /sign:
+        post:
+            tags:
+                - signer
+            summary: Sign signer
+            description: Sign creates digital signature on base64 encoded binary data.
+            operationId: createSignature
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/SignRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SignResult"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+    /verification-methods/{namespace}/{did}:
+        get:
+            tags:
+                - signer
+            summary: VerificationMethods signer
+            description: VerificationMethods returns all public keys in a given namespace. The result is formatted as array of DID verification methods with their controller attribute being the given DID in the request.
+            operationId: getVerificationMethods
+            parameters:
+                - name: namespace
+                  in: path
+                  description: Keys namespace.
+                  required: true
+                  schema:
+                      type: string
+                      description: Keys namespace.
+                      example: transit
+                  example: transit
+                - name: did
+                  in: path
+                  description: DID controller of the keys.
+                  required: true
+                  schema:
+                      type: string
+                      description: DID controller of the keys.
+                      example: did:web:example.com
+                  example: did:web:example.com
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/VerificationMethodRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/DIDVerificationMethod"
+                                description: Array of public keys represented as DID Verification Methods.
+    /verification-methods/{namespace}/{key}/{did}:
+        get:
+            tags:
+                - signer
+            summary: VerificationMethod signer
+            description: VerificationMethod returns a single public key formatted as DID verification method for a given namespace, key and did. When did:jwk is set for did, a did:jwk is generated from the key.
+            operationId: getVerificationMethod
+            parameters:
+                - name: namespace
+                  in: path
+                  description: Key namespace.
+                  required: true
+                  schema:
+                      type: string
+                      description: Key namespace.
+                      example: transit
+                  example: transit
+                - name: key
+                  in: path
+                  description: Name of requested key.
+                  required: true
+                  schema:
+                      type: string
+                      description: Name of requested key.
+                      example: key1
+                  example: key1
+                - name: did
+                  in: path
+                  description: DID controller of the key.
+                  required: true
+                  schema:
+                      type: string
+                      description: DID controller of the key.
+                      example: did:web:example.com
+                  example: did:web:example.com
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/VerificationMethodRequestBody"
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/DIDVerificationMethod"
+components:
+    responses:
+        NotFound:
+            description: The specified resource was not found
+            content:
+                application/json:
+                    schema:
+                        $ref: "#/components/schemas/Error"
+        ServerError:
+            description: >-
+                May contain hints how to solve the error or indicate what went wrong at
+                the server. Must not outline any information about the internal
+                structure of the server.
+            content:
+                application/json:
+                    schema:
+                        $ref: "#/components/schemas/Error"
+
+    schemas:
+        Error:
+            type: object
+            title: Error
+            description: Used when an API throws an Error, typically with a HTTP response status code (3xx, 4xx, 5xx)
+            required:
+                - code
+                - reason
+            properties:
+                code:
+                    type: string
+                    description: Application relevant detail, defined in the API or a common list.
+                reason:
+                    type: string
+                    description: Explanation of the reason for the error which can be shown to a client user.
+                message:
+                    type: string
+                    description: More details and corrective actions related to the error which can be shown to a client user.
+                status:
+                    type: string
+                    description: HTTP Error code extension
+        SignatureType:
+            type: string
+            description: Type of signature
+            default: jsonwebsignature2020
+            enum:
+                - ed25519signature2020
+                - jsonwebsignature2020
+            example: ed25519signature2020
+        VerifiableCredentials:
+            description: Verifiable Credential in JSON format.
+            type: object
+            properties:
+                "@context":
+                    type: array
+                    items:
+                        type: string
+                        format: uri
+                    description: Additional JSONLD contexts to be specified in the VC.
+                id:
+                    type: string
+                    format: uri
+                    description: ID of the Verifiable Credential.
+                type:
+                    type: array
+                    items:
+                        type: string
+                    description: Type of the Verifiable Credential.
+                issuer:
+                    type: string
+                    format: uri
+                    description: Issuer DID of the Verifiable Credential.
+                issuanceDate:
+                    type: string
+                    description: Issuance date of the Verifiable Credential.
+                    format: date-time
+                credentialSubject:
+                    type: object
+                    description: Subject(s) of the Verifiable Credential.
+            additionalProperties: true
+            required:
+                - "@context"
+                - type
+                - issuer
+                - issuanceDate
+                - credentialSubject
+            example:
+                "@context":
+                    - https://www.w3.org/2018/credentials/v1
+                    - https://w3id.org/security/suites/jws-2020/v1
+                id: did:web:example.com#key1
+                issuer: did:web:example.com
+                issuanceDate: 2024-02-27T12:52:33.168245633Z
+                type:
+                    - VerifiableCredential
+                credentialSubject:
+                    id: uuid:2632367287r82729
+                    hello: world
+        Proof:
+            description: VC signature in JSON format.
+            type: object
+            properties:
+                type:
+                    type: string
+                    description: Type of the proof.
+                created:
+                    type: string
+                    description: Creation date of the proof.
+                    format: date-time
+                proofPurpose:
+                    type: string
+                    description: Purpose of the proof.
+                verificationMethod:
+                    type: string
+                    format: uri
+                    description: Verification method of the proof.
+                jws:
+                    type: string
+                    #    format: byte
+                    description: JWS signature of the proof.
+            additionalProperties: true
+            required:
+                - type
+                - created
+                - proofPurpose
+                - verificationMethod
+                - jws
+            example:
+                type: JsonWebSignature2020
+                created: 2024-02-27T12:52:33.168245633Z
+                proofPurpose: assertionMethod
+                verificationMethod: did:web:example.com#key1
+                jws: "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..qkdywq7qe7dck"
+        SignedCredentials:
+            description: Verifiable Credential with Proof in JSON format.
+            allOf:
+                - $ref: "#/components/schemas/VerifiableCredentials"
+                - properties:
+                      proof:
+                          $ref: "#/components/schemas/Proof"
+            required:
+                - "@context"
+                - issuer
+                - issuanceDate
+                - type
+                - credentialSubject
+                - proof
+            example:
+                "@context":
+                    - https://www.w3.org/2018/credentials/v1
+                    - https://w3id.org/security/suites/jws-2020/v1
+                id: did:web:example.com#key1
+                issuer: did:web:example.com
+                issuanceDate: 2024-02-27T12:52:33.168245633Z
+                type:
+                    - VerifiableCredential
+                credentialSubject:
+                    id: uuid:2632367287r82729
+                    hello: world
+                proof:
+                    type: JsonWebSignature2020
+                    created: 2024-02-27T12:52:33.168245633Z
+                    proofPurpose: assertionMethod
+                    verificationMethod: did:web:example.com#key1
+                    jws: "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19.."
+
+        CreateCredentialRequestBody:
+            type: object
+            properties:
+                format:
+                    type: string
+                    description: identifies the format of the credential.
+                    default: ldp_vc
+                    enum:
+                        - ldp_vc
+                        - vc+sd-jwt
+                group:
+                    type: string
+                    description: Group identifies a group of keys within a namespace.
+                    default: ""
+                key:
+                    type: string
+                    description: Key to use for the proof signature.
+                namespace:
+                    type: string
+                    description: Key namespace.
+                nonce:
+                    type: string
+                    description: Proof challenge
+                signatureType:
+                    $ref: "#/components/schemas/SignatureType"
+                status:
+                    type: boolean
+                    description: Append Status
+            additionalProperties: true
+            required:
+                - key
+                - namespace
+                - group
+                - "@context"
+                - issuer
+                - type
+                - credentialSubject
+            example:
+                format: ldp_vc
+                group: Group
+                key: key1
+                namespace: transit
+                nonce: 3483492392vvv-fff
+                signatureType: ed25519signature2020
+                status: true
+                "@context":
+                    - https://www.w3.org/2018/credentials/v1
+                    - https://w3id.org/security/suites/jws-2020/v1
+                issuer: did:web:example.com
+                issuanceDate: 2024-02-27T12:52:33.168245633Z
+                type: VerifiableCredential
+                credentialSubject:
+                    id: uuid:2632367287r82729
+                    hello: world
+        CreatePresentationRequestBody:
+            type: object
+            properties:
+                context:
+                    type: array
+                    items:
+                        type: string
+                        example: Expedita et.
+                    description: Additional JSONLD contexts to be specified in the VP.
+                data:
+                    type: array
+                    items:
+                        type: object
+                        example:
+                            payload: Aut minus omnis quidem.
+                    description: Raw JSON to be included inside the VP as Verifiable Credential.
+                group:
+                    type: string
+                    description: Group identifies a group of keys within a namespace.
+                    default: ""
+                issuer:
+                    type: string
+                    description: Issuer DID of the Verifiable Presentation.
+                key:
+                    type: string
+                    description: Key to use for the proof signature.
+                namespace:
+                    type: string
+                    description: Key namespace.
+                nonce:
+                    type: string
+                    description: Proof challenge
+                signatureType:
+                    $ref: "#/components/schemas/SignatureType"
+            example:
+                context:
+                    - https://www.w3.org/2018/credentials/v1
+                    - https://w3id.org/security/suites/jws-2020/v1
+                data:
+                    - hello: world
+                    - hola: mundo
+                group: Group
+                issuer: did:web:example.com
+                key: key1
+                namespace: transit
+                nonce: 3483492392vvv-fff
+                signatureType: ed25519signature2020
+            required:
+                - namespace
+                - key
+                - data
+                - group
+        ProofCredentialRequestBody:
+            type: object
+            properties:
+                credential:
+                    $ref: "#/components/schemas/VerifiableCredentials"
+                format:
+                    type: string
+                    description: identifies the format of the credential.
+                    default: ldp_vc
+                    enum:
+                        - ldp_vc
+                        - vc+sd-jwt
+                group:
+                    type: string
+                    description: Group identifies a group of keys within a namespace.
+                    default: ""
+                key:
+                    type: string
+                    description: Key to use for the proof signature (optional).
+                namespace:
+                    type: string
+                    description: Key namespace.
+                nonce:
+                    type: string
+                    description: Proof challenge
+                signatureType:
+                    $ref: "#/components/schemas/SignatureType"
+            #            example:
+            #                credential:
+            #                    context:
+            #                        - https://www.w3.org/2018/credentials/v1
+            #                        - https://w3id.org/security/suites/jws-2020/v1
+            #                    type:
+            #                        - VerifiableCredential
+            #                    issuer: did:web:nginx:policy:policy:example:example:1.0:evaluation
+            #                    issuancedate: 2010-01-01T19:23:24.651387237Z
+            #                    credentialsubject:
+            #                        name: Alice
+            #                        allow: true
+            #                format: ldp_vc
+            #                group: Group
+            #                key: test
+            #                namespace: transit
+            #                nonce: 3483492392vvv-fff
+            #                signatureType: ed25519signature2020
+            required:
+                - credential
+                - namespace
+                - key
+                - group
+        SignCredentialRequestBody:
+            type: object
+            properties:
+                credential:
+                    $ref: "#/components/schemas/VerifiableCredentials"
+                jwk:
+                    type: object
+            required:
+                - credential
+                - jwk
+        DIDVerificationMethod:
+            type: object
+            properties:
+                controller:
+                    type: string
+                    description: Controller of verification method specified as DID.
+                    example: did:web:example.com
+                id:
+                    type: string
+                    description: ID of verification method.
+                    example: key1
+                publicKeyJwk:
+                    type: string
+                    description: Public Key encoded in JWK format.
+                    example: "U3BlYWtlYXN5IG1ha2VzIHdvcmtpbmcgd2l0aCBBUElzIGZ1biE="
+                    format: byte
+                type:
+                    type: string
+                    description: Type of verification method key.
+                    example: JsonWebKey2020
+            description: Public Key represented as DID Verification Method.
+            example:
+                controller: did:web:example.com
+                id: key1
+                publicKeyJwk: "U3BlYWtlYXN5IG1ha2VzIHdvcmtpbmcgd2l0aCBBUElzIGZ1biE="
+                type: JsonWebKey2020
+            required:
+                - id
+                - type
+                - controller
+                - publicKeyJwk
+        DidConfigurationRequestBody:
+            type: object
+            properties:
+                x-signatureType:
+                    type: string
+                    description: Type of signature
+                    default: jsonwebsignature2020
+                    example: ed25519signature2020
+                    enum:
+                        - ed25519signature2020
+                        - jsonwebsignature2020
+            example:
+                x-signatureType: ed25519signature2020
+        DidListResponse:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/DidListResponseItem"
+                    description: did jwk list of keys
+                    example:
+                        - did: Sit voluptates nihil aspernatur.
+                          name: Quos possimus.
+                        - did: Sit voluptates nihil aspernatur.
+                          name: Quos possimus.
+            example:
+                list:
+                    - did: Sit voluptates nihil aspernatur.
+                      name: Quos possimus.
+                    - did: Sit voluptates nihil aspernatur.
+                      name: Quos possimus.
+            required:
+                - list
+        DidListResponseItem:
+            type: object
+            properties:
+                did:
+                    type: string
+                    description: DID JWK of key
+                    example: Tempore porro asperiores eligendi.
+                name:
+                    type: string
+                    description: name of the key.
+                    example: Et occaecati corporis dolorem quos et eius.
+            example:
+                did: Ut architecto.
+                name: Voluptatibus voluptatum voluptas vel corrupti sapiente.
+            required:
+                - name
+                - did
+        DidResponse:
+            type: object
+            properties:
+                controller:
+                    type: string
+                    description: controler of the document
+                    example: Exercitationem esse praesentium nemo occaecati.
+                id:
+                    type: string
+                    description: did of the document
+                    example: Quas sit.
+                service:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/ServiceEndpoint"
+                    description: serviceendpoints
+                    example:
+                        - id: Velit sit exercitationem et eligendi incidunt.
+                          serviceEndpoint: Totam quam.
+                          type: Molestiae eveniet vero est aliquam.
+                        - id: Velit sit exercitationem et eligendi incidunt.
+                          serviceEndpoint: Totam quam.
+                          type: Molestiae eveniet vero est aliquam.
+                        - id: Velit sit exercitationem et eligendi incidunt.
+                          serviceEndpoint: Totam quam.
+                          type: Molestiae eveniet vero est aliquam.
+                verificationMethod:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/DIDVerificationMethod"
+                    description: methods of the document
+                    example:
+                        - controller: did:web:example.com
+                          id: key1
+                          publicKeyJwk: "U3BlYWtlYXN5IG1ha2VzIHdvcmtpbmcgd2l0aCBBUElzIGZ1biE="
+                          type: JsonWebKey2020
+                        - controller: did:web:example.com
+                          id: key1
+                          publicKeyJwk: "U3BlYWtlYXN5IG1ha2VzIHdvcmtpbmcgd2l0aCBBUElzIGZ1biE="
+                          type: JsonWebKey2020
+                        - controller: did:web:example.com
+                          id: key1
+                          publicKeyJwk: "U3BlYWtlYXN5IG1ha2VzIHdvcmtpbmcgd2l0aCBBUElzIGZ1biE="
+                          type: JsonWebKey2020
+                        - controller: did:web:example.com
+                          id: key1
+                          publicKeyJwk: "U3BlYWtlYXN5IG1ha2VzIHdvcmtpbmcgd2l0aCBBUElzIGZ1biE="
+                          type: JsonWebKey2020
+            example:
+                controller: Sit eum veritatis.
+                id: Et et autem commodi beatae labore error.
+                service:
+                    - id: Velit sit exercitationem et eligendi incidunt.
+                      serviceEndpoint: Totam quam.
+                      type: Molestiae eveniet vero est aliquam.
+                    - id: Velit sit exercitationem et eligendi incidunt.
+                      serviceEndpoint: Totam quam.
+                      type: Molestiae eveniet vero est aliquam.
+                verificationMethod:
+                    - controller: did:web:example.com
+                      id: key1
+                      publicKeyJwk: "U3BlYWtlYXN5IG1ha2VzIHdvcmtpbmcgd2l0aCBBUElzIGZ1biE="
+                      type: JsonWebKey2020
+                    - controller: did:web:example.com
+                      id: key1
+                      publicKeyJwk: "U3BlYWtlYXN5IG1ha2VzIHdvcmtpbmcgd2l0aCBBUElzIGZ1biE="
+                      type: JsonWebKey2020
+                    - controller: did:web:example.com
+                      id: key1
+                      publicKeyJwk: "U3BlYWtlYXN5IG1ha2VzIHdvcmtpbmcgd2l0aCBBUElzIGZ1biE="
+                      type: JsonWebKey2020
+            required:
+                - id
+                - controller
+        JwkPublicKeyRequestBody:
+            type: object
+            properties:
+                engine:
+                    type: string
+                    description: Engine which shall used.
+                    default: transit
+                    example: transit
+                group:
+                    type: string
+                    description: Group identifies a group of keys within a namespace.
+                    default: ""
+                    example: Group
+            example:
+                engine: transit
+                group: Group
+            required:
+                - group
+        JwksResponse:
+            type: object
+            properties:
+                keys:
+                    type: array
+                    items:
+                        type: string
+                        example: Aut odit nam nesciunt accusantium facilis.
+                    #                        format: binary
+                    description: List of jwk
+                    example:
+                        - Labore facilis delectus quis.
+                        - Maxime magnam quidem veniam asperiores consectetur.
+                        - Quis in laborum laudantium esse.
+            example:
+                keys:
+                    - Error aut est aut harum sed.
+                    - Nisi at corporis nobis fugiat.
+                    - Soluta necessitatibus illo unde.
+                    - Blanditiis dolores aut saepe sit sed.
+            required:
+                - keys
+        NamespaceKeysRequestBody:
+            type: object
+            properties:
+                group:
+                    type: string
+                    description: Group identifies a group of keys within a namespace.
+                    default: ""
+                    example: Group
+            example:
+                group: Group
+            required:
+                - group
+        PresentationProofRequestBody:
+            type: object
+            properties:
+                group:
+                    type: string
+                    description: Group identifies a group of keys within a namespace.
+                    default: ""
+                    example: Group
+                issuer:
+                    type: string
+                    description: Issuer DID used to specify proof verification info.
+                    example: Provident laboriosam quidem veritatis vel id.
+                key:
+                    type: string
+                    description: Key to use for the proof signature.
+                    example: key1
+                namespace:
+                    type: string
+                    description: Key namespace.
+                    example: transit
+                nonce:
+                    type: string
+                    description: Proof challenge
+                    example: 3483492392vvv-fff
+                presentation:
+                    type: object
+                    description: Verifiable Presentation in JSON format.
+                signatureType:
+                    $ref: "#/components/schemas/SignatureType"
+            example:
+                group: Group
+                issuer: Laudantium reprehenderit assumenda consectetur.
+                key: key1
+                namespace: transit
+                nonce: 3483492392vvv-fff
+                presentation:
+                    title: Voluptatem odit sequi commodi odit unde consequatur.
+                signatureType: ed25519signature2020
+            required:
+                - namespace
+                - key
+                - presentation
+                - group
+        ServiceEndpoint:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: did of the document
+                    example: Et pariatur saepe tenetur eveniet.
+                serviceEndpoint:
+                    type: string
+                    description: Endpoint URL
+                    example: Tempora dicta quibusdam aut voluptate ea placeat.
+                type:
+                    type: string
+                    description: type of endpoint
+                    example: Et consequatur expedita magni itaque cum.
+            example:
+                id: Minus praesentium doloribus qui incidunt impedit.
+                serviceEndpoint: Illo autem pariatur tempore aut.
+                type: Nostrum ratione aut.
+            required:
+                - id
+                - type
+                - serviceEndpoint
+        SignRequestBody:
+            type: object
+            properties:
+                data:
+                    type: string
+                    description: Data that must be signed, encoded as base64 string.
+                    example: Tempore quia voluptatem aliquid.
+                group:
+                    type: string
+                    description: Group identifies a group of keys within a namespace.
+                    default: ""
+                    example: Group
+                key:
+                    type: string
+                    description: Key to be used for signing.
+                    example: Dolorum praesentium voluptatum.
+                namespace:
+                    type: string
+                    description: Key namespace to be used for signing.
+                    example: Aut quod similique assumenda nam quo aut.
+            example:
+                data: Repudiandae voluptatem possimus nisi dolorum.
+                group: Group
+                key: Ut omnis.
+                namespace: Quaerat officia magni recusandae aut autem nesciunt.
+            required:
+                - namespace
+                - key
+                - data
+                - group
+        SignResult:
+            type: object
+            properties:
+                signature:
+                    type: string
+                    description: Signature encoded as base64 string.
+                    example: Nulla amet.
+            example:
+                signature: Quisquam hic sed.
+            required:
+                - signature
+        VerificationMethodRequestBody:
+            type: object
+            properties:
+                engine:
+                    type: string
+                    description: Engine which shall used.
+                    default: transit
+                    example: transit
+                group:
+                    type: string
+                    description: Group identifies a group of keys within a namespace.
+                    default: ""
+                    example: Group
+            example:
+                engine: transit
+                group: Group
+        VerifyResult:
+            type: object
+            properties:
+                valid:
+                    type: boolean
+                    description: Valid specifies if the proof is successfully verified.
+            example:
+                valid: true
+            required:
+                - valid
